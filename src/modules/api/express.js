@@ -21,9 +21,16 @@ module.exports = class Express {
 		const router = express.Router();
 		app.use('/', router);
 		const jsonParser = express.json();
+		const client = this.client;
 
-		router.post('/ticket', jsonParser, async (req, res) => {
-			this.client.log.info('Create request received');
+		const auth = function(req, res, next) {
+			if (req.header('Authenticate') === client.token) {
+				next();
+			}
+		};
+
+		router.post('/ticket', [jsonParser, auth], async (req, res) => {
+			client.log.info('Create request received');
 			try {
 				const body = req.body;
 				const guild_id = body.guild_id;
@@ -32,15 +39,15 @@ module.exports = class Express {
 				const сategory_id = body.category_id;
 				const topic = body.topic;
 	
-				const registrar = await this.client.users.cache.get(registrar_id);
+				const registrar = await client.users.cache.get(registrar_id);
 	
-				const ticket = await this.client.tickets.create(guild_id, user_id, сategory_id, topic, true);
+				const ticket = await client.tickets.create(guild_id, user_id, сategory_id, topic, true);
 				await ticket.update({ claimed_by: registrar_id });
 	
-				const channel = await this.client.channels.cache.get(ticket.id);
+				const channel = await client.channels.cache.get(ticket.id);
 				await channel.permissionOverwrites.edit(registrar_id, { VIEW_CHANNEL: true }, `Ticket claimed by ${registrar.tag}`);
 	
-				const category = await this.client.db.models.Category.findOne({ where: { id: сategory_id } });
+				const category = await client.db.models.Category.findOne({ where: { id: сategory_id } });
 	
 				for (const role of category.roles) {
 					await channel.permissionOverwrites.edit(role, { VIEW_CHANNEL: false }, `Ticket claimed by ${registrar.tag}`);
@@ -48,26 +55,26 @@ module.exports = class Express {
 	
 				res.send(ticket);
 			} catch (error) {
-				this.client.log.debug(error);
+				client.log.debug(error);
 				res.send('Ticket not found')
 			}; 
 		});
 
-		app.delete('/ticket', jsonParser, async (req, res) => {
-			this.client.log.info('Delete request received');
+		app.delete('/ticket', [jsonParser], async (req, res) => {
+			client.log.info('Delete request received');
 
 			try {
 				const body = req.body;
 				const ticket_id = body.ticket_id;
 	
-				const ticket = await this.client.db.models.Ticket.findOne({ where: { id: ticket_id } });
+				const ticket = await client.db.models.Ticket.findOne({ where: { id: ticket_id } });
 	
-				await this.client.tickets.close(ticket.id, ticket.creator, ticket.guild);
+				await client.tickets.close(ticket.id, ticket.creator, ticket.guild);
 	
-				this.client.log.info('Ticket closed!');
+				client.log.info('Ticket closed!');
 				res.send('Ticket deleted');
 			} catch (error) {
-				this.client.log.debug(error);
+				client.log.debug(error);
 				res.send('Ticket not found');
 			}; 
 		});
