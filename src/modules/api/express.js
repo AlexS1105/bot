@@ -16,9 +16,13 @@ module.exports = class Express {
 			client.log.info(`Express app listening at http://localhost:${port}`);
 		});
 	}
-	
+
 	registerRoutes(app) {
-		app.get('/ticket', async (req, res) => {
+		const router = express.Router();
+		app.use('/', router);
+
+		router.post('/ticket', async (req, res) => {
+			client.log.info('Request Received!');
 			const guild_id = '790984766198644786';
 			const user_id = '167230144371490816';
 			const registrar_id = '167230144371490816';
@@ -42,7 +46,7 @@ module.exports = class Express {
 			res.send(ticket);
 		});
 
-		app.get('/ticketclose/:id', async (req, res) => {
+		app.delete('/ticket/:id', async (req, res) => {
 			const ticket_id = req.params.id;
 
 			const ticket = await this.client.db.models.Ticket.findOne({ where: { id: ticket_id } });
