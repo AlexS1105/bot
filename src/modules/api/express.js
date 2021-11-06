@@ -20,14 +20,16 @@ module.exports = class Express {
 	registerRoutes(app) {
 		const router = express.Router();
 		app.use('/', router);
+		const jsonParser = express.json();
 
-		router.post('/ticket', async (req, res) => {
-			client.log.info('Request Received!');
-			const guild_id = '790984766198644786';
-			const user_id = '167230144371490816';
-			const registrar_id = '167230144371490816';
-			const сategory_id = '906451001094049822';
-			const topic = 'Api Sent Topic';
+		router.post('/ticket', jsonParser, async (req, res) => {
+			this.client.log.info('Create request received');
+			const body = req.body;
+			const guild_id = body.guild_id;
+			const user_id = body.user_id;
+			const registrar_id = body.registrar_id;
+			const сategory_id = body.category_id;
+			const topic = body.topic;
 
 			const registrar = await this.client.users.cache.get(registrar_id);
 
@@ -46,8 +48,10 @@ module.exports = class Express {
 			res.send(ticket);
 		});
 
-		app.delete('/ticket/:id', async (req, res) => {
-			const ticket_id = req.params.id;
+		app.delete('/ticket', jsonParser, async (req, res) => {
+			this.client.log.info('Delete request received');
+			const body = req.body;
+			const ticket_id = body.id;
 
 			const ticket = await this.client.db.models.Ticket.findOne({ where: { id: ticket_id } });
 
