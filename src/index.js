@@ -100,6 +100,7 @@ const {
 } = require('discord.js');
 // eslint-disable-next-line no-unused-vars
 const Logger = require('leekslazylogger');
+const Express = require('./modules/api/express');
 
 /**
  * The Discord client
@@ -171,6 +172,8 @@ class Bot extends Client {
 
 			/** The command manager, used by internal and plugin commands */
 			this.commands = new CommandManager(this);
+
+			this.webserver = new Express(this);
 
 			/** The plugin manager */
 			this.plugins = new PluginManager(this);

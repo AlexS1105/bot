@@ -30,8 +30,9 @@ module.exports = class TicketManager extends EventEmitter {
 	 * @param {string} creator_id - ID of the ticket creator (user)
 	 * @param {string} category_id - ID of the ticket category
 	 * @param {string} [topic] - The ticket topic
+	 * @param {string} [is_system] - System ticket flag
 	 */
-	async create(guild_id, creator_id, category_id, topic) {
+	async create(guild_id, creator_id, category_id, topic, is_system) {
 		if (!topic) topic = '';
 
 		const cat_row = await this.client.db.models.Category.findOne({ where: { id: category_id } });
@@ -70,7 +71,8 @@ module.exports = class TicketManager extends EventEmitter {
 			guild: guild_id,
 			id: t_channel.id,
 			number,
-			topic: topic.length === 0 ? null : this.client.cryptr.encrypt(topic)
+			topic: topic.length === 0 ? null : this.client.cryptr.encrypt(topic),
+			is_system: is_system
 		});
 
 		(async () => {
@@ -98,7 +100,7 @@ module.exports = class TicketManager extends EventEmitter {
 
 			const components = new MessageActionRow();
 
-			if (cat_row.claiming) {
+			if (cat_row.claiming && !is_system) {
 				components.addComponents(
 					new MessageButton()
 						.setCustomId('ticket.claim')
@@ -108,7 +110,7 @@ module.exports = class TicketManager extends EventEmitter {
 				);
 			}
 
-			if (settings.close_button) {
+			if (settings.close_button && !is_system) {
 				components.addComponents(
 					new MessageButton()
 						.setCustomId('ticket.close')
@@ -127,7 +129,7 @@ module.exports = class TicketManager extends EventEmitter {
 					.join(', ')
 				: '';
 			const sent = await t_channel.send({
-				components: cat_row.claiming || settings.close_button ? [components] : [],
+				components: (cat_row.claiming || settings.close_button) && !is_system ? [components] : [],
 				content: i18n('ticket.opening_message.content', mentions, creator.user.toString()),
 				embeds: [embed]
 			});

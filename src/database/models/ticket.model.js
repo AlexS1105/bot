@@ -73,6 +73,10 @@ module.exports = (_client, sequelize) => {
 			},
 			type: DataTypes.JSON
 		},
+		is_system: {
+			defaultValue: false,
+			type: DataTypes.BOOLEAN
+		},
 		topic: {
 			allowNull: true,
 			type: DataTypes.TEXT

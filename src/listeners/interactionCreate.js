@@ -130,6 +130,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				// handle ticket claiming
 				if (!(await this.client.utils.isStaff(interaction.member))) return;
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+				if (t_row.is_system) return;
 				await t_row.update({ claimed_by: interaction.user.id });
 				await interaction.channel.permissionOverwrites.edit(interaction.user.id, { VIEW_CHANNEL: true }, `Ticket claimed by ${interaction.user.tag}`);
 
@@ -179,6 +180,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				// handle ticket unclaiming
 				if (!(await this.client.utils.isStaff(interaction.member))) return;
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+				if (t_row.is_system) return;
 				await t_row.update({ claimed_by: null });
 
 				await interaction.channel.permissionOverwrites.delete(interaction.user.id, `Ticket released by ${interaction.user.tag}`);
@@ -228,6 +230,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 			} else if (interaction.customId.startsWith('ticket.close')) {
 				// handle ticket close button
 				const t_row = await this.client.db.models.Ticket.findOne({ where: { id: interaction.channel.id } });
+				if (t_row.is_system) return;
 				await interaction.reply({
 					components: [
 						new MessageActionRow()

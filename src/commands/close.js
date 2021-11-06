@@ -233,6 +233,19 @@ module.exports = class CloseCommand extends Command {
 				});
 			}
 
+			if (t_row.is_system) {
+				return await interaction.reply({
+					embeds: [
+						new MessageEmbed()
+							.setColor(settings.error_colour)
+							.setTitle(i18n('commands.close.response.no_permission.title'))
+							.setDescription(i18n('commands.close.response.no_permission.description'))
+							.setFooter(settings.footer, interaction.guild.iconURL())
+					],
+					ephemeral: true
+				});
+			}
+
 			await interaction.reply({
 				components: [
 					new MessageActionRow()
