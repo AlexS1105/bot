@@ -60,7 +60,7 @@ module.exports = class Express {
 			}; 
 		});
 
-		app.delete('/ticket', [jsonParser], async (req, res) => {
+		app.delete('/ticket', [jsonParser, auth], async (req, res) => {
 			client.log.info('Delete request received');
 
 			try {
