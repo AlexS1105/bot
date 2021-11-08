@@ -53,10 +53,10 @@ module.exports = class Express {
 					await channel.permissionOverwrites.edit(role, { VIEW_CHANNEL: false }, `Ticket claimed by ${registrar.tag}`);
 				}
 	
-				res.send(ticket);
+				res.status(200).send(ticket);
 			} catch (error) {
 				client.log.debug(error);
-				res.send('Ticket not found')
+				res.status(500).send('Ticket not found')
 			}; 
 		});
 
@@ -72,10 +72,10 @@ module.exports = class Express {
 				await client.tickets.close(ticket.id, ticket.creator, ticket.guild);
 	
 				client.log.info('Ticket closed!');
-				res.send('Ticket deleted');
+				res.status(200).send('Ticket deleted');
 			} catch (error) {
 				client.log.debug(error);
-				res.send('Ticket not found');
+				res.status(500).send('Ticket not found');
 			}; 
 		});
 	};
