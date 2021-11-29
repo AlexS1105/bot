@@ -37,7 +37,7 @@ module.exports = class Express {
 				.then(member => { res.status(200).json({ found: true }) })
 				.catch(err => { 
 					client.log.debug(err);
-					res.status(500).json({ found: false }) ;
+					res.status(500).json({ found: false });
 				});
         });
 
