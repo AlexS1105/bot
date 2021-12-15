@@ -29,17 +29,16 @@ module.exports = class Express {
 			}
 		};
 
-		// эта хуйня требует чтобы в user/config.json был guildID, добавь его сам :sunglasses:
 		router.get("/has-user", [auth], async (req, res, next) => {
 			client.log.info('User request received');
 
-            const user = client.guilds.cache.get(client.config.guildID).members.fetch({ user: req.query.id, force: true, cache: false})
-				.then(member => { res.status(200).json({ found: true }) })
+			const user = client.guilds.cache.get(client.config.guildID).members.fetch({ user: req.query.id, force: true, cache: false})
+				.then(member => { res.status(200).json(true) })
 				.catch(err => { 
 					client.log.debug(err);
-					res.status(500).json({ found: false });
+					res.status(500).json(false);
 				});
-        });
+			});
 
 		router.post('/ticket', [jsonParser, auth], async (req, res) => {
 			client.log.info('Create request received');
