@@ -1,11 +1,14 @@
 const express = require('express');
+const axios = require('axios');
 
 module.exports = class Express {
-	/**
-	 * Create a Express instance
-	 * @param {import('../..').Bot} client
-	 */
+
 	constructor(client) {
+		const {
+			API_KEY,
+			API_URL
+		} = process.env;
+
 		this.client = client;
 		const app = express();
 		const port = 3000;
@@ -15,6 +18,13 @@ module.exports = class Express {
 		app.listen(port, () => {
 			client.log.info(`Express app listening at http://localhost:${port}`);
 		});
+
+		client.on('guildMemberRemove', member => {
+			client.log.info('Member leave: ' + member.id);
+
+			axios.patch(process.env.API_URL + '/unverify-user', { user_id: member.id }, 
+				{ headers: { 'X-Authorization': process.env.API_KEY } });
+		});
 	}
 
 	registerRoutes(app) {
@@ -23,13 +33,7 @@ module.exports = class Express {
 		const jsonParser = express.json();
 		const client = this.client;
 
-		const auth = function(req, res, next) {
-			if (req.header('Authenticate') === client.token) {
-				next();
-			}
-		};
-
-		router.get("/has-user", [auth], async (req, res, next) => {
+		router.get("/has-user", async (req, res, next) => {
 			client.log.info('User request received');
 
 			const user = client.guilds.cache.get(client.config.guildID).members.fetch({ user: req.query.id, force: true, cache: false})
@@ -40,7 +44,7 @@ module.exports = class Express {
 				});
 			});
 
-		router.post('/ticket', [jsonParser, auth], async (req, res) => {
+		router.post('/ticket', [jsonParser], async (req, res) => {
 			client.log.info('Create request received');
 			try {
 				const body = req.body;
@@ -71,7 +75,7 @@ module.exports = class Express {
 			}; 
 		});
 
-		app.delete('/ticket', [jsonParser, auth], async (req, res) => {
+		app.delete('/ticket', [jsonParser], async (req, res) => {
 			client.log.info('Delete request received');
 
 			try {

@@ -52,5 +52,6 @@ module.exports = {
 		randomise: true
 	},
 	super_secret_setting: true,
-	update_notice: true
+	update_notice: true,
+	guildID: "000000000000000000"
 };
